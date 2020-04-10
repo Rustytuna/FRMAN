@@ -1,0 +1,15 @@
+spanish_to_english:
+  "C\xF3mo se llama?": "What's your name?"
+  "Cu\xE1l es su correo electr\xF3nico?": "What's your email?"
+  "Cu\xE1l es su n\xFAmero de tel\xE9fono?": "What's your phone number?"
+  "Cu\xE1l tipo de contacto prefiere?": "How do you prefer to be contacted?"
+  "Qu\xE9 necesita usted?": "What do you need?"
+  "Cu\xE1l es su c\xF3digo postal? (Si no sabe, ponga su ciudad y barrio).": "What's your zip code? (If you don't know, write your city and neighborhood)."
+  Puede salir de su casa?: "Can you leave your home?"
+  "Agregue cualquier detalle adicional sobre lo que usted necesita aqu\xED": "Add any additional detail about what you need here"
+
+default_needs:
+  - "Someone to buy me food/groceries"
+  - "Someone to deliver food/groceries"
+  - "Childcare"
+  - "Money"
