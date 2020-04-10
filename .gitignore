@@ -2,3 +2,5 @@ db/*
 credentials/*
 *.pickle
 .idea/
+__pycache__/*
+.DS_Store
