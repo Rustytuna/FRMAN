@@ -13,3 +13,31 @@ default_needs:
   - "Someone to deliver food/groceries"
   - "Childcare"
   - "Money"
+
+needs_airtable_to_id:
+  Other: recKr7q1xvjy8Efq3
+  Food Prep: recM0ghnBahxfhqkZ
+  Financial Assistance: recRjm6aaVwHR33q4
+  Grocery Delivery: recSwOyD6Cjp5B5ag
+  Grocery Purchase Assistance: recUmZrmEW6PCNosW
+  Transportation: rech4qEHCJohYIRB6
+  Caregiver: recryMrSQJiY4uArD
+  Handy Person: rect5C6YvNdw9QVOo
+
+sheets_needs_to_airtable:
+  "Someone to buy me food/groceries": recUmZrmEW6PCNosW
+  "Someone to deliver food/groceries": recSwOyD6Cjp5B5ag
+  "Childcare": recryMrSQJiY4uArD
+  "Money": recRjm6aaVwHR33q4
+  "Other": recKr7q1xvjy8Efq3
+
+sheets_to_airtable_column_mapping:
+  What's your name?: Name
+  What's your email?: Email Address
+  What's your phone number?: Phone
+  # How do you prefer to be contacted?:
+  What's your zip code? (If you don't know, write your city and neighborhood).: Zip Code
+  # Can you leave your home?: 6
+  # language: 7
+
+

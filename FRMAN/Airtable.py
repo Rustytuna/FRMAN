@@ -25,7 +25,7 @@ class Airtable:
             "fields.", ""), inplace=True)
         return dataframe
 
-    def insert_json(self, json, imported=True):
+    def insert_json(self, json: dict):
         """
         INSERT RECORDS INTO AIRTABLE.
         """

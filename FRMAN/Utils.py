@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-adjuftments Utilities File. So far, just yml and logging.
+FRMAN Utilities File. So far, just yml and logging.
 """
 
 from argparse import ArgumentParser
@@ -23,7 +23,7 @@ def pretty_print(dataframe, showindex=True, tablefmt="presto"):
 def logger(level="info", timestamp=True, filename=None,
            custom_format=None, inherit_env=True):
     """
-    Default Logging Method for adjuftments. This takes multiple
+    Default Logging Method for FRMAN. This takes multiple
     parameters/environmental variable to define logging output.
     This function accepts the following environmental variables:
 
@@ -212,9 +212,9 @@ class Arguments:
         return parser.parse_args().__dict__
 
 
-class AdjuftmentsError(Exception):
+class FRMANError(Exception):
     """
-    Exception class for adjuftments.
+    Exception class for FRMAN.
     """
     pass
 

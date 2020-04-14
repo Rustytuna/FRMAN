@@ -9,7 +9,12 @@ Testing File for FRMAN Airtable / Google Sheets Integration
 from logging import getLogger
 from pprint import pprint
 from pandas import DataFrame
+import names
+import phonenumbers
+import zipcodes
 from yaml import dump
+from requests.exceptions import HTTPError
+from uuid import uuid4, UUID
 
 from pandas import read_pickle, concat
 
@@ -23,18 +28,22 @@ log = getLogger(yaml["logger"])
 sql = SQL(yaml["sql"]["db_file"])
 
 
-# airtableRequests = Airtable(base=yaml["airtable"]["base"],
-#                             api_key=yaml["airtable"]["api_key"],
-#                             table="Requests")
-# requests_df = airtableRequests.get_airtable_raw(params=None)
-# pretty_print(requests_df)
+def get_airtable_df(table_name: str = "Requests") -> DataFrame:
+    airtable_requests_object = Airtable(base=yaml["airtable"]["base"],
+                                        api_key=yaml["airtable"]["api_key"],
+                                        table=table_name)
+    requests_df = airtable_requests_object.get_airtable_raw(params=None)
+    return requests_df
 
-# SheetsConn = Sheets(token=yaml["google_sheets"]["token"],
-#                     client_secret=yaml["google_sheets"]["client_secret"])
-# sheets_df = SheetsConn.sheet_to_df(sheet_id=yaml["google_sheets"]["sheet_id"],
-#                                    sheet_name="Requests")
-# sql.ingest_df(dataframe=sheets_df, table_name="sheets", if_exists="replace")
-# sheets_df.to_pickle("sheets.pickle")
+
+def get_sheets_df():
+    SheetsConn = Sheets(token=yaml["google_sheets"]["token"],
+                        client_secret=yaml["google_sheets"]["client_secret"])
+    sheets_df = SheetsConn.sheet_to_df(
+        sheet_id=yaml["google_sheets"]["sheet_id"],
+        sheet_name="Requests")
+    sql.ingest_df(dataframe=sheets_df, table_name="sheets", if_exists="replace")
+    sheets_df.to_pickle("sheets.pickle")
 
 
 # sheets_df = read_pickle("sheets.pickle")
@@ -42,6 +51,7 @@ sql = SQL(yaml["sql"]["db_file"])
 # column_dict = [{key: ""} for key in columns]
 # with open("migration/sheets.yaml", 'w') as file:
 #     documents = dump(data=column_dict, stream=file, sort_keys=False)
+
 
 # for diction in column_dict["english_to_spanish"]:
 #     print(diction)
@@ -74,47 +84,141 @@ def break_out_language_requests(request_df: DataFrame) -> tuple:
     english_df.drop(spanish_columns + [language_question], inplace=True, axis=1)
     spanish_df.drop(english_columns + [language_question], inplace=True, axis=1)
     spanish_df.rename(columns=sheet_yaml["spanish_to_english"], inplace=True)
-    english_df["language"] = "english"
-    spanish_df["language"] = "spanish"
+    english_df["language"] = "English"
+    spanish_df["language"] = "Español"
     return english_df, spanish_df
+
+
+def get_city_dict():
+    cities = get_airtable_df("Cities")
+    df_json = cities[["Zip Code", "id"]].set_index("id").to_dict(
+        orient="index")
+    new_dict = {value["Zip Code"]: key for key, value in df_json.items()}
+    return new_dict
+
+
+def apply_needs_info(english_requests: DataFrame):
+    master_needs = []
+    needs = english_requests["What do you need?"].unique().tolist()
+    default_needs = sheet_yaml["default_needs"]
+    need_match = dict()
+    for unique_needs in needs:
+        original_unique_needs = unique_needs
+        needs_list = list()
+        for default_need in default_needs:
+            if default_need in unique_needs:
+                needs_list.append(default_need)
+                unique_needs = unique_needs.replace(default_need + ", ", "")
+                unique_needs = unique_needs.replace(default_need, "")
+        if len(unique_needs) > 0:
+            needs_list.append("Other")
+            addl_info = "\n".join(["*****", "What do you need?:", unique_needs,
+                                   "*****", "Additional Information:"])
+        else:
+            addl_info = ""
+        need_match[original_unique_needs] = {"needs": needs_list,
+                                             "other": addl_info}
+
+    english_requests["needs_list"] = english_requests[
+        "What do you need?"].apply(
+        lambda x: need_match[x]["needs"])
+    english_requests["additional_info"] = english_requests[
+        "What do you need?"].apply(
+        lambda x: need_match[x]["other"])
+    info_columns = ["additional_info",
+                    "Add any additional detail about what you need here"]
+    english_requests["Additional Information"] = english_requests[
+        info_columns].apply(
+        lambda row: "\n".join(row.values.astype(str)).strip(), axis=1)
+    english_requests.fillna("", inplace=True)
+    english_requests.drop(info_columns + ["What do you need?"], inplace=True,
+                          axis=1)
+    return english_requests
 
 
 sheet_yaml = yml("migration/sheets.yaml")
 request_df = read_pickle("sheets.pickle")
-english_requests, spanish_requests = break_out_language_requests(
+english_requests_object, spanish_requests = break_out_language_requests(
     request_df=request_df)
+english_requests_df = apply_needs_info(english_requests_object)
+print(english_requests_df.columns)
 
-master_needs = []
-needs = english_requests["What do you need?"].unique().tolist()
-default_needs = sheet_yaml["default_needs"]
-need_match = dict()
-for unique_needs in needs:
-    original_unique_needs = unique_needs
-    needs_list = list()
-    for default_need in default_needs:
-        if default_need in unique_needs:
-            needs_list.append(default_need)
-            unique_needs = unique_needs.replace(default_need + ", ", "")
-            unique_needs = unique_needs.replace(default_need, "")
-    if len(unique_needs) > 0:
-        needs_list.append("Other")
-        addl_info = f"What do you need?:\n{unique_needs}\n\n"
-    else:
-        addl_info = ""
-    need_match[original_unique_needs] = {"needs": needs_list,
-                                         "other": addl_info}
+atRequests = Airtable(base=yaml["airtable"]["base"],
+                      api_key=yaml["airtable"]["api_key"],
+                      table="Requests")
 
-english_requests["needs_list"] = english_requests["What do you need?"].apply(
-    lambda x: need_match[x]["needs"])
-english_requests["additional_info"] = english_requests[
-    "What do you need?"].apply(
-    lambda x: need_match[x]["other"])
-info_columns = ["additional_info",
-                "Add any additional detail about what you need here"]
-english_requests["info"] = english_requests[info_columns].apply(
-    lambda row: "\n".join(row.values.astype(str)).strip(), axis=1)
-english_requests.fillna("", inplace=True)
-english_requests.drop(info_columns + ["What do you need?"], inplace=True,
-                      axis=1)
-pretty_print(english_requests.tail(200))
-print(english_requests[english_requests["needs_list"] == []])
+zip_dictionary = get_city_dict()
+for index, row in english_requests_df.head(20).iterrows():
+    needs = row["needs_list"]
+    migrated_needs = list()
+    for need_string in needs:
+        migrated_needs.append(
+            sheet_yaml["sheets_needs_to_airtable"][need_string])
+    # print(migrated_needs)
+    request_zip = row[
+        "What's your zip code? (If you don't know, write your city and neighborhood)."]
+    try:
+        abc = zipcodes.matching(str(request_zip))
+        zip_thing = [zip_dictionary[str(request_zip)]]
+    except BaseException as e:
+        zip_thing = None
+
+    information_object = "\n".join(
+        ["*****",
+         "Contact:",
+         str(row["How do you prefer to be contacted?"]),
+         "*****",
+         "Phone:",
+         str(row["What's your phone number?"]),
+         "*****",
+         "Email Address:",
+         str(row["What's your email?"]),
+         "*****",
+         "Contact:",
+         str(row["How do you prefer to be contacted?"]),
+         "*****",
+         "Location:",
+         str(row["What's your zip code? (If you don't know, write "
+                 "your city and neighborhood)."]),
+         "*****",
+         "Can you leave your home?:",
+         str(row["Can you leave your home?"]),
+         "*****",
+         "Language:",
+         str(row["language"]),
+         "*****",
+         "Details:",
+         str(row["Additional Information"])
+         ])
+
+    airtable_object = {"Name": row["What's your name?"],
+                       "Email Address": row["What's your email?"],
+                       "Phone": row["What's your phone number?"],
+                       "Zip Code": zip_thing,
+                       "Service Requested": migrated_needs,
+                       "Details": information_object}
+    try:
+        airtable_object["Phone"] = phonenumbers.format_number(
+            phonenumbers.parse(
+                number=str(airtable_object["Phone"]), region="US"),
+            phonenumbers.PhoneNumberFormat.NATIONAL)
+        atRequests.insert_json(airtable_object)
+    except (HTTPError, TypeError,
+            phonenumbers.phonenumberutil.NumberParseException) as e:
+        # print(e)
+        airtable_object.pop("Phone")
+        atRequests.insert_json(airtable_object)
+    pprint(airtable_object)
+
+airtable_requests = get_airtable_df("Requests")
+print(airtable_requests.columns)
+
+for index, row in airtable_requests.iterrows():
+    if row["Ticket"] >= 16:
+        pass
+        # atRequests.delete(row["id"])
+
+
+# airtable_services = get_airtable_df("Services and Skills")
+# print(airtable_services.columns)
+# pretty_print(airtable_services.head(100))
