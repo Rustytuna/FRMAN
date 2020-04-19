@@ -7,6 +7,8 @@ spanish_to_english:
   "Cu\xE1l es su c\xF3digo postal? (Si no sabe, ponga su ciudad y barrio).": "What's your zip code? (If you don't know, write your city and neighborhood)."
   Puede salir de su casa?: "Can you leave your home?"
   "Agregue cualquier detalle adicional sobre lo que usted necesita aqu\xED": "Add any additional detail about what you need here"
+  "Usted es miembro de un grupo marginado? (Por ejemplo, es trans, indocumentado, una persona de color, inmunocomprometido, etc.)": "Are you a member of a marginalized group? (For example, are you a person of color, trans, immunocompromised, undocumented, low-income, etc.)"
+  "Si se siente cómodo, por favor liste las identidades de cuales está marginado. Por favor NO liste información privada que podría ponerse en riesgo si fuera pública (por ejemplo, que es indocumentado o trans). Hacemos lo que podemos para asegurar que esta información es privada, pero no queremos poner su seguridad en riesgo. ": "If you feel comfortable, please list the identities that you are marginalized along below. Please DO NOT list any private information that could put you at risk if it were made public (for example, that you are undocumented or trans). We do our absolute best to make sure that this information remains private, but we don’t want to put your safety at risk."
 
 default_needs:
   - "Someone to buy me food/groceries"
@@ -35,9 +37,21 @@ sheets_to_airtable_column_mapping:
   What's your name?: Name
   What's your email?: Email Address
   What's your phone number?: Phone
-  # How do you prefer to be contacted?:
+  How do you prefer to be contacted?: Contact Preference
   What's your zip code? (If you don't know, write your city and neighborhood).: Zip Code
-  # Can you leave your home?: 6
+  Can you leave your home?: Can Leave Home
   # language: 7
+  #
+  # We don't have columns for these...
+  # Are you a member of a marginalized group? (For example, are you a person of color, trans, immunocompromised, undocumented, low-income, etc.)
+  # If you feel comfortable, please list the identities that you are marginalized along below. Please DO NOT list any private information that could put you at risk if it were made public (for example, that you are undocumented or trans). We do our absolute best to make sure that this information remains private, but we don’t want to put your safety at risk.
+  Add any additional detail about what you need here: Details
 
+sheets_can_leave_home_to_airtable:
+  "Yes": "Yes"
+  "No, I am under quarantine": "No"
+  "No, I am immunocompromised": "No"
+  "No, I have a disability that prevents me from leaving": "No"
+  "No, I do not have transportation": "No"
+  "Other": "No" # There aren't many of these, and they are all basically no.
 
