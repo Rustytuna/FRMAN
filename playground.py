@@ -10,6 +10,7 @@ from logging import getLogger
 from pprint import pprint
 from pandas import DataFrame
 from yaml import dump
+from dotenv import load_dotenv
 
 from pandas import read_pickle, concat
 
@@ -18,16 +19,18 @@ from FRMAN.Sheets import Sheets
 from FRMAN.Utils import yml, pretty_print
 from FRMAN.SQL import SQL
 
+load_dotenv()
+
 yaml = yml()
 log = getLogger(yaml["logger"])
 sql = SQL(yaml["sql"]["db_file"])
 
 
-# airtableRequests = Airtable(base=yaml["airtable"]["base"],
-#                             api_key=yaml["airtable"]["api_key"],
-#                             table="Requests")
-# requests_df = airtableRequests.get_airtable_raw(params=None)
-# pretty_print(requests_df)
+airtableRequests = Airtable(base=yaml["airtable"]["base"],
+                            api_key=yaml["airtable"]["api_key"],
+                            table="Requests")
+requests_df = airtableRequests.get_airtable_raw(params=None)
+pretty_print(requests_df)
 
 # SheetsConn = Sheets(token=yaml["google_sheets"]["token"],
 #                     client_secret=yaml["google_sheets"]["client_secret"])
@@ -71,8 +74,10 @@ def break_out_language_requests(request_df: DataFrame) -> tuple:
             language_question] == "Prefiero responder en espanol."].copy()
 
     english_df.drop
-    english_df.drop(spanish_columns + [language_question], inplace=True, axis=1)
-    spanish_df.drop(english_columns + [language_question], inplace=True, axis=1)
+    english_df.drop(spanish_columns +
+                    [language_question], inplace=True, axis=1)
+    spanish_df.drop(english_columns +
+                    [language_question], inplace=True, axis=1)
     spanish_df.rename(columns=sheet_yaml["spanish_to_english"], inplace=True)
     english_df["language"] = "english"
     spanish_df["language"] = "spanish"
