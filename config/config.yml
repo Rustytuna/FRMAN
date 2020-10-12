@@ -1,15 +1,15 @@
-logger:                         FRMAN.utils
+logger: FRMAN.utils
 
 airtable:
-    base:                       appentKER1D0rDz0Q
-    api_key:                    ${FRMAN_AIRTABLE_API_KEY}
+  base: appentKER1D0rDz0Q
+  api_key: ${FRMAN_AIRTABLE_API_KEY}
 
 google_sheets:
-    sheet_id:                   1ekzegKqGMdmr_AbuWEzRmZxwjd2aiQTdqVpl1aUyqo4
-    token:                      credentials/token.pkl
-    client_secret:              credentials/client_secret.json
-    scope:
-        - https://www.googleapis.com/auth/spreadsheets
-        - https://www.googleapis.com/auth/spreadsheets.readonly
+  sheet_id: 1ekzegKqGMdmr_AbuWEzRmZxwjd2aiQTdqVpl1aUyqo4
+  token: credentials/token.pkl
+  client_secret: credentials/client_secret.json
+  scope:
+    - https://www.googleapis.com/auth/spreadsheets
+    - https://www.googleapis.com/auth/spreadsheets.readonly
 sql:
-    db_file:                    db/FRMAN.sqlite
+  db_file: db/FRMAN.sqlite

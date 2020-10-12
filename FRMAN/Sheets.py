@@ -15,8 +15,8 @@ from googleapiclient.discovery import build
 from pandas import DataFrame, to_datetime, to_timedelta
 from pygsheets import authorize
 from logging import getLogger
-from adjuftments.Utils import LOG_LEVEL
-from adjuftments.Utils import yml
+from FRMAN.Utils import LOG_LEVEL
+from FRMAN.Utils import yml
 yaml = yml()
 
 getLogger('googleapiclient.discovery').setLevel(LOG_LEVEL.ERROR)
